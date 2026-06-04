@@ -5,13 +5,16 @@ import { geminiAdapter } from '../adapters/gemini.js'
 import { ollamaAdapter } from '../adapters/ollama.js'
 import type { Adapter } from '../types/common.js'
 
+/** Maximum buffer size for a single SSE line (1 MB). Prevents OOM on malformed streams. */
+const MAX_LINE_BUFFER = 1024 * 1024
+
 /**
  * Parse a Server-Sent Events (SSE) stream from any provider and yield universal StreamChunks.
  *
  * Handles all provider SSE quirks:
  * - OpenAI/Ollama/Groq: `data: {...}\n\n` with `data: [DONE]` terminator
  * - Anthropic: `event: <type>\ndata: {...}\n\n` with typed events
- * - Gemini: JSON array chunks or SSE depending on endpoint
+ * - Gemini: SSE format when using `?alt=sse`
  *
  * @example
  * const response = await fetch('https://api.openai.com/v1/chat/completions', { ... })
@@ -52,8 +55,8 @@ export async function* parseSSEStream(
       continue
     }
 
-    // For Anthropic, wrap parsed data with the event type
-    if (provider === 'anthropic' && eventType) {
+    // For Anthropic, set the event type on parsed data (only if it's an object)
+    if (provider === 'anthropic' && eventType && typeof parsed === 'object' && parsed !== null) {
       ;(parsed as Record<string, unknown>).type = eventType
       eventType = null
     }
@@ -64,16 +67,11 @@ export async function* parseSSEStream(
 }
 
 /**
- * Parse a Gemini streaming response.
- * Gemini's REST streaming returns JSON array chunks, not standard SSE.
- * When using `?alt=sse`, it returns standard SSE format.
- *
- * This function handles both formats.
+ * Parse a Gemini streaming response (SSE format, used with `?alt=sse`).
  */
 export async function* parseGeminiStream(
   stream: ReadableStream<Uint8Array>,
 ): AsyncGenerator<StreamChunk> {
-  // Try SSE format first (used with ?alt=sse)
   yield* parseSSEStream(stream, 'gemini')
 }
 
@@ -103,13 +101,15 @@ function getStaticAdapter(provider: Provider): Adapter {
     case 'openai': return openaiAdapter
     case 'gemini': return geminiAdapter
     case 'ollama': return ollamaAdapter
-    default: return openaiAdapter
+    default:
+      throw new Error(`Unknown provider: ${provider as string}`)
   }
 }
 
 /**
  * Read a ReadableStream<Uint8Array> and yield individual SSE lines.
  * Handles partial chunks and multi-byte UTF-8 correctly.
+ * Throws if a single line exceeds MAX_LINE_BUFFER to prevent OOM.
  */
 async function* readSSELines(
   stream: ReadableStream<Uint8Array>,
@@ -124,6 +124,10 @@ async function* readSSELines(
       if (done) break
 
       buffer += decoder.decode(value, { stream: true })
+
+      if (buffer.length > MAX_LINE_BUFFER) {
+        throw new Error(`SSE line exceeded maximum buffer size (${MAX_LINE_BUFFER} bytes)`)
+      }
 
       const lines = buffer.split('\n')
       // Keep the last partial line in the buffer

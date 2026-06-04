@@ -8,6 +8,7 @@ import type {
   AssistantMessage,
   ToolCall,
 } from '../types/common.js'
+import { mergeExtra } from '../utils/safe-merge.js'
 import type {
   AnthropicChatRequest,
   AnthropicChatResponse,
@@ -233,7 +234,7 @@ export function createAnthropicAdapter(): Adapter & {
       if (request.stream !== undefined) result.stream = request.stream
 
       if (request.extra) {
-        Object.assign(result, request.extra)
+        mergeExtra(result as Record<string, unknown>, request.extra)
       }
 
       return result

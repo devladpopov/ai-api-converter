@@ -8,6 +8,7 @@ import type {
   AssistantMessage,
   ToolCall,
 } from '../types/common.js'
+import { mergeExtra } from '../utils/safe-merge.js'
 import type {
   GeminiChatRequest,
   GeminiChatResponse,
@@ -188,6 +189,14 @@ function mapFinishReason(reason: string): string {
   return map[reason] ?? reason
 }
 
+// ─── ID generation ───────────────────────────────────────
+
+let geminiIdCounter = 0
+
+function nextGeminiId(): string {
+  return `gemini-${Date.now()}-${geminiIdCounter++}`
+}
+
 // ─── Adapter ─────────────────────────────────────────────
 
 export const geminiAdapter: Adapter = {
@@ -228,7 +237,7 @@ export const geminiAdapter: Adapter = {
     if (hasGenConfig) result.generationConfig = genConfig
 
     if (request.extra) {
-      Object.assign(result, request.extra)
+      mergeExtra(result as Record<string, unknown>, request.extra)
     }
 
     return result
@@ -238,7 +247,7 @@ export const geminiAdapter: Adapter = {
     const r = raw as GeminiChatResponse
 
     return {
-      id: `gemini-${Date.now()}`,
+      id: nextGeminiId(),
       model: r.modelVersion ?? 'gemini',
       choices: r.candidates.map((c) => ({
         index: c.index,
@@ -281,7 +290,7 @@ export const geminiAdapter: Adapter = {
     }
 
     return {
-      id: `gemini-${Date.now()}`,
+      id: nextGeminiId(),
       model: r.modelVersion ?? 'gemini',
       choices: [{
         index: 0,

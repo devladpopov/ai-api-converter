@@ -8,6 +8,7 @@ import type {
   ToolCall,
   AssistantMessage,
 } from '../types/common.js'
+import { mergeExtra } from '../utils/safe-merge.js'
 import type {
   OpenAIChatRequest,
   OpenAIChatResponse,
@@ -137,7 +138,7 @@ export const openaiAdapter: Adapter = {
     if (request.stream !== undefined) result.stream = request.stream
 
     if (request.extra) {
-      Object.assign(result, request.extra)
+      mergeExtra(result as Record<string, unknown>, request.extra)
     }
 
     return result
