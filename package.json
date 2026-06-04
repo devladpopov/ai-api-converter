@@ -1,0 +1,63 @@
+{
+  "name": "ai-api-converter",
+  "version": "0.1.0",
+  "description": "Convert between OpenAI, Anthropic, Gemini & Ollama API formats. Zero dependencies, type-safe.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "openai",
+    "anthropic",
+    "gemini",
+    "ollama",
+    "ai",
+    "llm",
+    "api",
+    "converter",
+    "adapter",
+    "typescript",
+    "tool-calling",
+    "function-calling",
+    "streaming",
+    "zero-dependency"
+  ],
+  "author": "devladpopov",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devladpopov/ai-api-converter.git"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
