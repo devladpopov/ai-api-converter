@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+Thumbs.db
+coverage/
+.turbo/
+*.tsbuildinfo
+
+# Project-specific non-code files
+recent-messages.jsonl
+SOUL.md
+main-memory.md
+CHECKPOINT.md
