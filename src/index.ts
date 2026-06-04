@@ -58,6 +58,9 @@ export {
   ollamaAdapter,
 } from './adapters/index.js'
 
+// ─── Streaming utilities ─────────────────────────────────
+export { parseSSEStream, parseGeminiStream, collectStreamText } from './utils/index.js'
+
 // ─── Convert helpers ──────────────────────────────────────
 import type { ChatRequest, ChatResponse, StreamChunk, Provider } from './types/common.js'
 import { openaiAdapter } from './adapters/openai.js'
