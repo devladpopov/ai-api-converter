@@ -1,5 +1,11 @@
 # ai-api-converter
 
+[![npm version](https://img.shields.io/npm/v/ai-api-converter.svg)](https://www.npmjs.com/package/ai-api-converter)
+[![license](https://img.shields.io/npm/l/ai-api-converter.svg)](https://github.com/devladpopov/ai-api-converter/blob/master/LICENSE)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/ai-api-converter)](https://bundlephobia.com/package/ai-api-converter)
+![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)
+
 Convert between OpenAI, Anthropic, Gemini, and Ollama API formats with a single function call.
 
 **Zero dependencies. Type-safe. Works everywhere: Node, Deno, Bun, Cloudflare Workers, browsers.**
@@ -112,14 +118,53 @@ const { text, chunks } = await collectStreamText(response.body!, 'openai')
 console.log(text) // "Hello! How can I help you?"
 ```
 
-## Supported providers
+## Embeddings
 
-| Provider | Request | Response | Streaming | Tool calls |
-|----------|:---:|:---:|:---:|:---:|
-| OpenAI | Yes | Yes | Yes | Yes |
-| Anthropic | Yes | Yes | Yes | Yes |
-| Google Gemini | Yes | Yes | Yes | Yes |
-| Ollama | Yes | Yes | Yes | Yes* |
+Convert between embedding API formats for OpenAI, Gemini, and Ollama:
+
+```ts
+import { toEmbeddingProviderRequest, fromEmbeddingProviderResponse } from 'ai-api-converter'
+
+const request = { model: 'text-embedding-3-small', input: ['Hello', 'World'] }
+
+const openaiBody = toEmbeddingProviderRequest(request, 'openai')
+const geminiBody = toEmbeddingProviderRequest(request, 'gemini') // auto-batched
+const ollamaBody = toEmbeddingProviderRequest(request, 'ollama')
+
+// Parse responses back to universal format
+const result = fromEmbeddingProviderResponse(rawResponse, 'openai')
+console.log(result.embeddings[0].values) // number[]
+```
+
+> Note: Anthropic does not have a native embeddings API.
+
+## Token counting
+
+Approximate token counting, zero dependencies:
+
+```ts
+import { countTokens, countMessageTokens } from 'ai-api-converter'
+
+countTokens('Hello world', 'openai')      // { tokens: 3, method: 'approximate' }
+countTokens('Hello world', 'anthropic')   // { tokens: 4, method: 'approximate' }
+
+countMessageTokens([
+  { role: 'system', content: 'You are helpful.' },
+  { role: 'user', content: 'Hi!' },
+], 'openai') // { tokens: 16, method: 'approximate' }
+```
+
+## Compatibility table
+
+| Feature | OpenAI | Anthropic | Gemini | Ollama |
+|---------|:---:|:---:|:---:|:---:|
+| Chat request/response | Yes | Yes | Yes | Yes |
+| Streaming (SSE) | Yes | Yes | Yes | Yes* |
+| Tool calling | Yes | Yes | Yes | Yes* |
+| Vision / multimodal | Yes | Yes | Yes | - |
+| System prompt | Yes | Yes | Yes | Yes |
+| Embeddings | Yes | - | Yes | Yes |
+| Token counting | Yes | Yes | Yes | Yes |
 
 \* Ollama disables streaming when tools are present (known Ollama limitation).
 
@@ -146,17 +191,12 @@ All types are exported for full TypeScript integration:
 
 ```ts
 import type {
-  ChatRequest,
-  ChatResponse,
-  StreamChunk,
-  Message,
-  Tool,
-  ToolCall,
-  Provider,
+  ChatRequest, ChatResponse, StreamChunk,
+  Message, Tool, ToolCall, Provider,
+  EmbeddingRequest, EmbeddingResponse,
+  TokenCountProvider, TokenCountResult,
   // Provider-specific types
-  OpenAIChatRequest,
-  AnthropicChatRequest,
-  GeminiChatRequest,
+  OpenAIChatRequest, AnthropicChatRequest, GeminiChatRequest,
 } from 'ai-api-converter'
 ```
 
@@ -168,6 +208,9 @@ import type {
 - **Tool call ID resolution**: Gemini needs function names for responses; the adapter resolves these from conversation history
 - **Default max_tokens**: Anthropic requires `max_tokens`; defaults to 4096 if not specified
 - **Streaming quirks**: Ollama breaks streaming with tools enabled; the adapter automatically disables it
+- **Vision/multimodal**: Base64 and URL images converted between OpenAI `image_url`, Anthropic `image` blocks, and Gemini `inlineData`/`fileData`
+- **SSE buffer protection**: Stream parser enforces 1MB line buffer limit to prevent memory exhaustion
+- **Prototype pollution protection**: `extra` field merge blocks `__proto__`, `constructor`, and `prototype` keys
 
 ## License
 

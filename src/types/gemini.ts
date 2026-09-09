@@ -14,6 +14,13 @@ export interface GeminiInlineDataPart {
   }
 }
 
+export interface GeminiFileDataPart {
+  fileData: {
+    mimeType: string
+    fileUri: string
+  }
+}
+
 export interface GeminiFunctionCallPart {
   functionCall: {
     name: string
@@ -31,6 +38,7 @@ export interface GeminiFunctionResponsePart {
 export type GeminiPart =
   | GeminiTextPart
   | GeminiInlineDataPart
+  | GeminiFileDataPart
   | GeminiFunctionCallPart
   | GeminiFunctionResponsePart
 

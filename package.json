@@ -28,8 +28,9 @@
     "test:watch": "bun test --watch",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "prepack": "tsup"
   },
+  "sideEffects": false,
   "keywords": [
     "openai",
     "anthropic",
@@ -44,8 +45,17 @@
     "tool-calling",
     "function-calling",
     "streaming",
-    "zero-dependency"
+    "zero-dependency",
+    "multimodal",
+    "vision",
+    "embeddings",
+    "sse",
+    "token-counting"
   ],
+  "homepage": "https://github.com/devladpopov/ai-api-converter#readme",
+  "bugs": {
+    "url": "https://github.com/devladpopov/ai-api-converter/issues"
+  },
   "author": "devladpopov",
   "license": "MIT",
   "repository": {

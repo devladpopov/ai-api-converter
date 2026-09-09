@@ -8,7 +8,7 @@ export interface AnthropicTextBlock {
   text: string
 }
 
-export interface AnthropicImageBlock {
+export interface AnthropicImageBlockBase64 {
   type: 'image'
   source: {
     type: 'base64'
@@ -16,6 +16,16 @@ export interface AnthropicImageBlock {
     data: string
   }
 }
+
+export interface AnthropicImageBlockUrl {
+  type: 'image'
+  source: {
+    type: 'url'
+    url: string
+  }
+}
+
+export type AnthropicImageBlock = AnthropicImageBlockBase64 | AnthropicImageBlockUrl
 
 export interface AnthropicToolUseBlock {
   type: 'tool_use'

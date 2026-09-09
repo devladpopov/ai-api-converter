@@ -47,6 +47,12 @@ export type {
   GeminiChatRequest,
   GeminiChatResponse,
   GeminiStreamChunk,
+  // Embeddings
+  EmbeddingProvider,
+  EmbeddingRequest,
+  EmbeddingResponse,
+  Embedding,
+  EmbeddingAdapter,
 } from './types/index.js'
 
 // ─── Adapters ─────────────────────────────────────────────
@@ -56,10 +62,21 @@ export {
   createAnthropicAdapter,
   geminiAdapter,
   ollamaAdapter,
+  // Embedding adapters
+  openaiEmbeddingAdapter,
+  geminiEmbeddingAdapter,
+  ollamaEmbeddingAdapter,
+  getEmbeddingAdapter,
+  toEmbeddingProviderRequest,
+  fromEmbeddingProviderResponse,
 } from './adapters/index.js'
 
 // ─── Streaming utilities ─────────────────────────────────
 export { parseSSEStream, parseGeminiStream, collectStreamText } from './utils/index.js'
+
+// ─── Token counting ─────────────────────────────────────
+export { countTokens, countMessageTokens } from './utils/index.js'
+export type { TokenCountProvider, TokenCountResult } from './utils/index.js'
 
 // ─── Convert helpers ──────────────────────────────────────
 import type { ChatRequest, ChatResponse, StreamChunk, Provider } from './types/common.js'

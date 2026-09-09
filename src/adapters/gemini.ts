@@ -89,6 +89,14 @@ function convertUserParts(content: string | ContentPart[]): GeminiPart[] {
   if (typeof content === 'string') return [{ text: content }]
   return content.map((part): GeminiPart => {
     if (part.type === 'text') return { text: part.text }
+    if (part.url) {
+      return {
+        fileData: {
+          mimeType: part.mediaType ?? 'image/png',
+          fileUri: part.url,
+        },
+      }
+    }
     return {
       inlineData: {
         mimeType: part.mediaType ?? 'image/png',

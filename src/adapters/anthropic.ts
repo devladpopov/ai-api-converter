@@ -87,6 +87,12 @@ function convertUserContent(content: string | ContentPart[]): string | Anthropic
     if (part.type === 'text') {
       return { type: 'text', text: part.text }
     }
+    if (part.url) {
+      return {
+        type: 'image',
+        source: { type: 'url', url: part.url },
+      }
+    }
     return {
       type: 'image',
       source: {
